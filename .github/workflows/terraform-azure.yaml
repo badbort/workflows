@@ -141,8 +141,14 @@ jobs:
       - name: Check latest on branch
         # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
+          echo "Before fetch"
           git log -4
           
+          git branch --show-current | wc -l
+          
+          echo "After fetch"
+          git fetch
+          git log -2
           git branch --show-current | wc -l
 
       - name: Terraform Apply
