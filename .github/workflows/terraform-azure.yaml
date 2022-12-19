@@ -1,19 +1,34 @@
 on:
   workflow_call:
     inputs:
+      directory:
+        required: false
+        type: string
+        description: Directory of the terraform root module. Defaults to the root of the repo
+        default: './'
+        
       repo-token: 
         required: true
         type: string
         description: "The GitHub token to use for the run"
+        
+      environment: 
+        required: false
+        type: string
+        description: "The GitHub environment being deployed to"
+        
     secrets:
-      AZURE_AD_TENANT_ID:
+      AZURE_TENANT_ID:
         required: true
         description: "The Tenant ID in which the Subscription exists."
-      AZURE_AD_CLIENT_ID:
+      AZURE_CLIENT_ID:
         required: true
         description: "The Client ID of the Service Principal used by Terraform."
-      AZURE_AD_CLIENT_SECRET:
-        required: true
+      AZURE_CREDENTIALS:
+        required: false
+        description: "The Azure credentials json object for authentication."
+      AZURE_CLIENT_SECRET:
+        required: false
         description: "The Client Secret of the Service Principal."
       AZURE_SUBSCRIPTION_ID:
         required: true
@@ -23,14 +38,15 @@ jobs:
   terraform:
     name: 'Terraform'
     runs-on: ubuntu-latest
-    environment: tf
+    environment: ${{inputs.environment}}
     defaults:
       run:
         working-directory: ./${{env.tf_directory}}
     
     env:
-      ARM_USE_OIDC: true
+      ARM_USE_OIDC: ${{inputs.environment != '' && 'true' || 'false'}}
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
     steps:
@@ -39,8 +55,15 @@ jobs:
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
-      
+
+      - name: Log in to Azure using credentials secret
+        if: secrets.AZURE_CREDENTIALS != ''
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          
       - name: Log in to Azure using OIDC
+        if: secrets.AZURE_CREDENTIALS == ''
         uses: azure/login@v1
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
