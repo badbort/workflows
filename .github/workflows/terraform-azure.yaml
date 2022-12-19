@@ -49,6 +49,9 @@ jobs:
 
     steps:
       - run: |
+          pwd
+          ls
+          
           if [ -z "${{secrets.AZURE_CREDENTIALS}}" ]
           then
                 echo "USE_AZURE_CREDENTIALS=false" >> $GITHUB_ENV
