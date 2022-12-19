@@ -46,7 +46,7 @@ jobs:
     env:
       ARM_USE_OIDC: ${{inputs.environment != '' && 'true' || 'false'}}
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
     steps:
@@ -139,4 +139,6 @@ jobs:
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false
+        run: |
+          echo "ref  ${{ github.ref }}"
+          terraform apply -auto-approve -input=false
