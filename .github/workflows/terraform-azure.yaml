@@ -159,6 +159,7 @@ jobs:
       - name: Check latest on branch
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
+          git fetch --update-shallow --update-head-ok
           currentCommit=$(git rev-parse HEAD)
           latestCommit=$(git rev-parse origin/main)
           
