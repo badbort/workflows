@@ -165,7 +165,7 @@ jobs:
           git branch --show-current | wc -l
           
           echo "After fetch"
-          git fetch
+          git fetch origin main:main --depth 1
           git fetch --update-shallow
           git log -2
           git branch --show-current | wc -l
