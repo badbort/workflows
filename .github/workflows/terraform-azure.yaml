@@ -58,7 +58,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2
+          fetch-depth: 1
         
       - name: Set up mutex
         if: inputs.mutex-branch != ''
@@ -160,7 +160,7 @@ jobs:
         # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
           git show --pretty='format:%H'
-          git show origin/master --pretty='format:%H'
+          git show origin/main --pretty='format:%H'
           
           echo "Before fetch"
           git log -4
