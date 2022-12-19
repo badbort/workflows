@@ -159,11 +159,12 @@ jobs:
       - name: Check latest on branch
         # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
-          git show --pretty='format:%H'
+          git show --pretty='format:%H' --no-patch
+          git show origin/main --pretty='format:%H' --no-patch
           
           git rev-parse HEAD
           
-          git rev-parse origin/master
+          git rev-parse origin/main
           
           echo "Before fetch"
           git log -4
@@ -177,7 +178,7 @@ jobs:
           git branch --show-current | wc -l
           
           git rev-parse HEAD
-          git rev-parse origin/master
+          git rev-parse origin/main
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
