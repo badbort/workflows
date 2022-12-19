@@ -162,6 +162,8 @@ jobs:
           currentCommit=$(git rev-parse HEAD)
           latestCommit=$(git rev-parse origin/main)
           
+          echo "Current: $currentCommit. Latest: $latestCommit"
+          
           if [[ "$currentCommit" == "$latestCommit" ]]; then
               echo "We are on the latest commit for main"
           else
