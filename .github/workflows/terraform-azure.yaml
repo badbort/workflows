@@ -7,6 +7,12 @@ on:
         description: Directory of the terraform root module. Defaults to the root of the repo
         default: './'
         
+      tf_branch:
+        required: true
+        type: string
+        description: The branch we are deploying
+        default: main
+        
       mutex-branch:
         required: false
         type: boolean
