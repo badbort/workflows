@@ -7,10 +7,10 @@ on:
         description: Directory of the terraform root module. Defaults to the root of the repo
         default: './'
         
-      tf_branch:
+      tf_apply_branch:
         required: true
         type: string
-        description: The branch we are deploying
+        description: The branch that is being deployed
         default: main
         
       mutex-branch:
@@ -163,7 +163,7 @@ jobs:
         run: exit 1
 
       - name: Check latest on branch
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: format('refs/heads/{0}', inputs.tf_apply_branch) == github.ref && github.event_name == 'push'
         run: |
         
           git log -5
@@ -186,7 +186,7 @@ jobs:
           fi
 
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: format('refs/heads/{0}', inputs.tf_apply_branch) == github.ref && github.event_name == 'push'
         run: |
           echo "ref  ${{ github.ref }}"
           pwd
