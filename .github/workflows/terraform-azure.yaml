@@ -48,6 +48,9 @@ jobs:
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+        
       - run: |
           pwd
           ls
@@ -60,9 +63,6 @@ jobs:
                 echo "USE_AZURE_CREDENTIALS=true" >> $GITHUB_ENV
                 echo "az login will use AZURE_CREDENTIALS env var"
           fi
-          
-      - name: Checkout Code
-        uses: actions/checkout@v2
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
