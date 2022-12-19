@@ -159,24 +159,6 @@ jobs:
       - name: Check latest on branch
         # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
-          git show --pretty='format:%H' --no-patch
-          git show origin/main --pretty='format:%H' --no-patch
-          
-          git rev-parse HEAD
-          
-          git rev-parse origin/main
-          
-          echo "Before fetch"
-          git log -4
-          
-          git branch --show-current | wc -l
-          
-          echo "After fetch"
-          
-          git fetch --update-shallow --update-head-ok
-          git log -2
-          git branch --show-current | wc -l
-          
           git rev-parse HEAD
           git rev-parse origin/main
 
