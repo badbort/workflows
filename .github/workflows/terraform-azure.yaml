@@ -49,6 +49,16 @@ jobs:
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
     steps:
+      - run: |
+          if [ -z "${{secrets.AZURE_CREDENTIALS}}" ]
+          then
+                echo "USE_AZURE_CREDENTIALS=false" >> $GITHUB_ENV
+                echo "az login will use OIDC"
+          else
+                echo "USE_AZURE_CREDENTIALS=true" >> $GITHUB_ENV
+                echo "az login will use AZURE_CREDENTIALS env var"
+          fi
+          
       - name: Checkout Code
         uses: actions/checkout@v2
 
@@ -56,13 +66,13 @@ jobs:
         uses: hashicorp/setup-terraform@v2
 
       - name: Log in to Azure using credentials secret
-        if: secrets.AZURE_CREDENTIALS != ''
+        if: env.USE_AZURE_CREDENTIALS == true
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           
       - name: Log in to Azure using OIDC
-        if: secrets.AZURE_CREDENTIALS == ''
+        if: env.USE_AZURE_CREDENTIALS != true
         uses: azure/login@v1
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
