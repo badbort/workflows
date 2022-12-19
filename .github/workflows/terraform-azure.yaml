@@ -7,10 +7,6 @@ on:
         description: Directory of the terraform root module. Defaults to the root of the repo
         default: './'
         
-      repo-token: 
-        required: true
-        type: string
-        description: "The GitHub token to use for the run"
         
       environment: 
         required: false
@@ -33,6 +29,9 @@ on:
       AZURE_SUBSCRIPTION_ID:
         required: true
         description: "The Subscription ID in which the Terraform state storage account exists."
+      GH_READ_TOKEN: 
+        required: false
+        description: "The GitHub token to use for the run"
 
 jobs:
   terraform:
