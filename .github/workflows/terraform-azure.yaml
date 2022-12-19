@@ -39,7 +39,7 @@ jobs:
     environment: ${{inputs.environment}}
     defaults:
       run:
-        working-directory: ./${{env.tf_directory}}
+        working-directory: ${{env.tf_directory}}
     
     env:
       ARM_USE_OIDC: ${{inputs.environment != '' && 'true' || 'false'}}
