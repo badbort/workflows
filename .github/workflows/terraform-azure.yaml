@@ -175,7 +175,7 @@ jobs:
               echo "We are on the latest commit for main"
           else
               echo "We are behind on commits!"
-              echo "Detected workflow running on out-of-date commit" && exit
+              (>&2 echo "Detected workflow running on out-of-date commit"; exit 1)
           fi
 
       - name: Terraform Apply
