@@ -141,7 +141,7 @@ jobs:
       - name: Check latest on branch
         # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
-          git log
+          git log -4
           
           git branch --show-current | wc -l
 
