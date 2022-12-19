@@ -169,7 +169,7 @@ jobs:
           
           echo "After fetch"
           
-          git fetch --update-shallow
+          git fetch --update-shallow --update-head-ok
           git log -2
           git branch --show-current | wc -l
 
