@@ -7,6 +7,13 @@ on:
         description: Directory of the terraform root module. Defaults to the root of the repo
         default: './'
         
+      mutex-branch:
+        required: false
+        type: boolean
+        description: |
+          Branch name to use for the terraform workflow mutex functionality. When specified all workflow runs are queued and executed
+          in the order they were dispatched. This functionality uses a git branch with an unrelated history to orchestrate the queue.
+        
       environment: 
         required: false
         type: string
@@ -50,6 +57,12 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
+        
+      - name: Set up mutex
+        if: mutex-branch != ''
+        uses: ben-z/gh-action-mutex@v1.0-alpha-7
+        with:
+          branch: ${{ inputs.mutex-branch }}
         
       - run: |
           pwd
