@@ -157,10 +157,17 @@ jobs:
         run: exit 1
 
       - name: Check latest on branch
-        # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
-          git rev-parse HEAD
-          git rev-parse origin/main
+          currentCommit=$(git rev-parse HEAD)
+          latestCommit=$(git rev-parse origin/main)
+          
+          if [[ "$currentCommit" == "$latestCommit" ]]; then
+              echo "We are on the latest commit for main"
+          else
+              echo "We are behind on commits!"
+              fail "Detected workflow running on out-of-date commit"
+          fi
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
