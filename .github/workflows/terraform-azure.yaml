@@ -164,6 +164,7 @@ jobs:
           
           echo "After fetch"
           git fetch
+          git fetch --update-shallow
           git log -2
           git branch --show-current | wc -l
 
