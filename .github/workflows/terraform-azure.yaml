@@ -173,12 +173,12 @@ jobs:
           git log -5
           
           currentCommit=$(git rev-parse HEAD)
-          latestCommit=$(git rev-parse origin/main)
+          latestCommit=$(git rev-parse origin/${{inputs.tf_apply_branch}})
           
           echo "Current: $currentCommit. Latest: $latestCommit"
           
           if [[ "$currentCommit" == "$latestCommit" ]]; then
-              echo "We are on the latest commit for main"
+              echo "We are on the latest commit for ${{inputs.tf_apply_branch}}"
           else
               echo "We are behind on commits!"
               echo "::error::Detected workflow running on out-of-date commit"
