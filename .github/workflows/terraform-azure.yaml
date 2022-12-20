@@ -15,7 +15,7 @@ on:
         
       mutex-branch:
         required: false
-        type: boolean
+        type: string
         description: |
           Branch name to use for the terraform workflow mutex functionality. When specified all workflow runs are queued and executed
           in the order they were dispatched. This functionality uses a git branch with an unrelated history to orchestrate the queue.
