@@ -171,10 +171,12 @@ jobs:
           
           echo $workflow_run_obj
           
+          run_id = $(echo $workflow_run_obj | jq .id -r)
+          
           workflow_id=$(echo $workflow_run_obj | jq .workflow_id -r)
           workflow_run_number=$(echo $workflow_run_obj | jq .run_number -r)
           
-          echo "Blah. Workflow run id is $workflow_id, run number $workflow_run_number"
+          echo "Blah. Workflow id is $workflow_id, run id $run_id, run number $workflow_run_number"
           gh api -H "Accept: application/vnd.github+json" /repos/${{ github.repository }}/actions/workflows/$workflow_id/runs | jq '.workflow_runs | map ({id, run_number, display_title, run_started_at, event, head_branch})'
           
           git log -5
