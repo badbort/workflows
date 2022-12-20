@@ -166,6 +166,8 @@ jobs:
         if: format('refs/heads/{0}', inputs.tf_apply_branch) == github.ref && github.event_name == 'push'
         run: |
         
+          gh api -H "Accept: application/vnd.github+json" /repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}
+            
           git log -5
           git fetch --update-shallow -v
           
