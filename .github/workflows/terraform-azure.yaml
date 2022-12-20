@@ -169,6 +169,8 @@ jobs:
         run: |
           workflow_run_obj=$(gh api -H "Accept: application/vnd.github+json" '/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}')
           
+          echo $workflow_run_obj
+          
           workflow_id=$(echo $workflow_run_obj | jq .workflow_id -r)
           workflow_run_number=$(echo $workflow_run_obj | jq .run_number -r)
           
