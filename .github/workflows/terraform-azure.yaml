@@ -171,8 +171,7 @@ jobs:
           
           echo $workflow_run_obj
           
-          run_id = $(echo $workflow_run_obj | jq .id -r)
-          
+          run_id=$(echo $workflow_run_obj | jq .id -r)
           workflow_id=$(echo $workflow_run_obj | jq .workflow_id -r)
           workflow_run_number=$(echo $workflow_run_obj | jq .run_number -r)
           
