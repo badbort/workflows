@@ -167,12 +167,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          workflow_id=$(gh api -H "Accept: application/vnd.github+json" /repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }} | jq .workflow_id -r)
+          workflow_run_obj=$(gh api -H "Accept: application/vnd.github+json" '/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}')
           
-          echo "Blah"
-          gh api -H "Accept: application/vnd.github+json" /repos/${{ github.repository }}/actions/workflows/$workflow_id/runs | jq .
+          workflow_id=$(echo $workflow_run_obj | jq .workflow_id -r)
+          workflow_run_number=$(echo $workflow_run_obj | jq .run_number -r)
           
-          
+          echo "Blah. Workflow run id is $workflow_id, run number $workflow_run_number"
+          gh api -H "Accept: application/vnd.github+json" /repos/${{ github.repository }}/actions/workflows/$workflow_id/runs | jq '.workflow_runs | map ({id, run_number, display_title, run_started_at, event, head_branch})'
           
           git log -5
           git fetch --update-shallow -v
