@@ -207,7 +207,7 @@ jobs:
           fi
 
       - name: Terraform Apply
-        if: (format('refs/heads/{0}', inputs.tf_apply_branch) == github.ref && github.event_name == 'push') && (env.SKIP_APPLY != '')
+        if: (format('refs/heads/{0}', inputs.tf_apply_branch) == github.ref && github.event_name == 'push') && (env.SKIP_APPLY == '')
         run: |
           echo "ref  ${{ github.ref }}"
           pwd
