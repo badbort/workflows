@@ -167,52 +167,36 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          workflow_run_obj=$(gh api -H "Accept: application/vnd.github+json" '/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}')
+          workflowRun=$(gh api -H "Accept: application/vnd.github+json" '/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}')
           
-          echo "Current workflow run:"
-          echo $(echo $workflow_run_obj | jq .)
+          echo "::group::Current workflow run"
+          echo $(echo $workflowRun | jq .)
+          echo "::endgroup::"
           
-          run_id=$(echo $workflow_run_obj | jq .id -r)
-          workflow_id=$(echo $workflow_run_obj | jq .workflow_id -r)
-          workflow_run_number=$(echo $workflow_run_obj | jq .run_number -r)
-          echo "Blah. Workflow id is $workflow_id, run id $run_id, run number $workflow_run_number"
+          run_id=$(echo $workflowRun | jq .id -r)
+          workflowId=$(echo $workflowRun | jq .workflow_id -r)
+          workflowRunNumber=$(echo $workflowRun | jq .run_number -r)
           
-          workflow_runs=$(gh api -H "Accept: application/vnd.github+json" /repos/${{ github.repository }}/actions/workflows/$workflow_id/runs)
+          workflowRuns=$(gh api -H "Accept: application/vnd.github+json" /repos/${{ github.repository }}/actions/workflows/$workflowId/runs)
           
-          echo "Workflow runs"
-          echo "$(echo $workflow_runs | jq '.workflow_runs | map(select(.event == "push" and .head_branch == "main") ) | map ({id, run_number, display_title, run_started_at, run_attempt, event, head_branch}) | max_by(.run_number)')"
+          latestRuns="$(echo $workflowRuns | jq '.workflow_runs | map(select(.event == "push" and .head_branch == "${{inputs.tf_apply_branch}}") ) | map ({id, run_number, display_title, run_started_at, run_attempt, event, head_branch})')"
+          echo "::group::Latest workflow runs"
+          echo $latestRuns
+          echo "::endgroup::"
           
-          latestRun=$(echo $workflow_runs | jq '.workflow_runs | map(select(.event == "push" and .head_branch == "main") ) | map ({id, run_number, display_title, run_started_at, run_attempt, event, head_branch}) | max_by(.run_number)')
+          latestRun=$(echo $latestRuns | jq 'max_by(.run_number)')
           
-          echo "Latest run info:"
+          echo "::group::Latest workflow run"
           echo $latestRun
+          echo "::endgroup::"
           
           latestRunNumber=$(echo $latestRun | jq '.run_number' -r)
           
-          if [[ "$latestRunNumber" == "$workflow_run_number" ]]; then
-              echo "We the latest workflow run!"
+          if [[ "$latestRunNumber" == "$workflowRunNumber" ]]; then
+              echo "Confirmed this is the latest workflow run"
           else
               echo "We are running an old workflow. Abandon ship"
               echo "::error::Detected old workflow run"
-              exit 1
-          fi
-          
-          git log -5
-          git fetch --update-shallow -v
-          
-          echo "Post fetch"
-          git log -5
-          
-          currentCommit=$(git rev-parse HEAD)
-          latestCommit=$(git rev-parse origin/${{inputs.tf_apply_branch}})
-          
-          echo "Current: $currentCommit. Latest: $latestCommit"
-          
-          if [[ "$currentCommit" == "$latestCommit" ]]; then
-              echo "We are on the latest commit for ${{inputs.tf_apply_branch}}"
-          else
-              echo "We are behind on commits!"
-              echo "::error::Detected workflow running on out-of-date commit"
               exit 1
           fi
 
