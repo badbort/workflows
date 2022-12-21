@@ -181,7 +181,7 @@ jobs:
           
           echo "Blah. Workflow id is $workflow_id, run id $run_id, run number $workflow_run_number"
           
-          latestRun=$(echo $workflow_runs | jq '.workflow_runs | map(select(.event == "push" and .head_branch == "main") ) | map ({id, run_number, display_title, run_started_at, run_attempt, event, head_branch}) | max_by(.run_number)' -r)
+          latestRun=$(echo $workflow_runs | jq '.workflow_runs | map(select(.event == "push" and .head_branch == "main") ) | map ({id, run_number, display_title, run_started_at, run_attempt, event, head_branch}) | max_by(.run_number)')
           
           echo "Latest run: 
           $latestRun"
