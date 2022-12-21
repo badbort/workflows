@@ -180,7 +180,7 @@ jobs:
           workflow_runs=$(gh api -H "Accept: application/vnd.github+json" /repos/${{ github.repository }}/actions/workflows/$workflow_id/runs)
           
           echo "Workflow runs"
-          echo "$(echo $workflow_runs | jq '.workflow_runs | map(select(.event == "push" and .head_branch == "main") ) | map ({id, run_number, display_title, run_started_at, run_attempt, event, head_branch}) | max_by(.run_number))"
+          echo "$(echo $workflow_runs | jq '.workflow_runs | map(select(.event == "push" and .head_branch == "main") ) | map ({id, run_number, display_title, run_started_at, run_attempt, event, head_branch}) | max_by(.run_number)')"
           
           latestRun=$(echo $workflow_runs | jq '.workflow_runs | map(select(.event == "push" and .head_branch == "main") ) | map ({id, run_number, display_title, run_started_at, run_attempt, event, head_branch}) | max_by(.run_number)')
           
