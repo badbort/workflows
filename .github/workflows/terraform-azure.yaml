@@ -167,7 +167,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          workflowRun=$(gh api -H "Accept: application/vnd.github+json" '/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }} | jq .')
+          workflowRun=$(gh api -H "Accept: application/vnd.github+json" '/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}' | jq '.')
           
           echo "::group::Current workflow run"
           echo "$workflowRun"
