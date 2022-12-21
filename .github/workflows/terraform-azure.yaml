@@ -194,14 +194,18 @@ jobs:
           
           if [[ "$latestRunNumber" == "$workflowRunNumber" ]]; then
               echo "Confirmed this is the latest workflow run"
+              echo "SKIP_APPLY=false" >> $GITHUB_ENV
+              
           else
               echo "We are running an old workflow. Abandon ship"
               echo "::error::Detected old workflow run"
-              exit 1
+              echo "::warning::Detected old workflow run. Skipping apply"
+              echo "SKIP_APPLY=true" >> $GITHUB_ENV
+              #exit 1
           fi
 
       - name: Terraform Apply
-        if: format('refs/heads/{0}', inputs.tf_apply_branch) == github.ref && github.event_name == 'push'
+        if: (format('refs/heads/{0}', inputs.tf_apply_branch) == github.ref && github.event_name == 'push') && (env.SKIP_APPLY != true)
         run: |
           echo "ref  ${{ github.ref }}"
           pwd
