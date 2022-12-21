@@ -167,10 +167,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          workflowRun=$(gh api -H "Accept: application/vnd.github+json" '/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}')
+          workflowRun=$(gh api -H "Accept: application/vnd.github+json" '/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }} | jq .')
           
           echo "::group::Current workflow run"
-          echo $(echo $workflowRun | jq .)
+          echo "$workflowRun"
           echo "::endgroup::"
           
           run_id=$(echo $workflowRun | jq .id -r)
@@ -181,13 +181,13 @@ jobs:
           
           latestRuns="$(echo $workflowRuns | jq '.workflow_runs | map(select(.event == "push" and .head_branch == "${{inputs.tf_apply_branch}}") ) | map ({id, run_number, display_title, run_started_at, run_attempt, event, head_branch})')"
           echo "::group::Latest workflow runs"
-          echo $latestRuns
+          echo "$latestRuns"
           echo "::endgroup::"
           
           latestRun=$(echo $latestRuns | jq 'max_by(.run_number)')
           
           echo "::group::Latest workflow run"
-          echo $latestRun
+          echo "$latestRun"
           echo "::endgroup::"
           
           latestRunNumber=$(echo $latestRun | jq '.run_number' -r)
