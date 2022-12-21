@@ -169,22 +169,23 @@ jobs:
         run: |
           workflow_run_obj=$(gh api -H "Accept: application/vnd.github+json" '/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}')
           
-          echo $workflow_run_obj
+          echo "Current workflow run:"
+          echo $($workflow_run_obj | jq .)
           
           run_id=$(echo $workflow_run_obj | jq .id -r)
           workflow_id=$(echo $workflow_run_obj | jq .workflow_id -r)
           workflow_run_number=$(echo $workflow_run_obj | jq .run_number -r)
+          echo "Blah. Workflow id is $workflow_id, run id $run_id, run number $workflow_run_number"
           
           workflow_runs=$(gh api -H "Accept: application/vnd.github+json" /repos/${{ github.repository }}/actions/workflows/$workflow_id/runs)
           
+          echo "Workflow runs"
           echo "$($workflow_runs |  | jq '.workflow_runs | map(select(.event == "push" and .head_branch == "main") ) | map ({id, run_number, display_title, run_started_at, run_attempt, event, head_branch}) | max_by(.run_number))"
-          
-          echo "Blah. Workflow id is $workflow_id, run id $run_id, run number $workflow_run_number"
           
           latestRun=$(echo $workflow_runs | jq '.workflow_runs | map(select(.event == "push" and .head_branch == "main") ) | map ({id, run_number, display_title, run_started_at, run_attempt, event, head_branch}) | max_by(.run_number)')
           
-          echo "Latest run: 
-          $latestRun"
+          echo "Latest run info:"
+          echo $latestRun
           
           latestRunNumber=$(echo $latestRun | jq '.run_number' -r)
           
