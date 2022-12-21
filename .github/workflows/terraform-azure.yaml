@@ -164,6 +164,8 @@ jobs:
 
       - name: Check latest on branch
         if: format('refs/heads/{0}', inputs.tf_apply_branch) == github.ref && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           # Gets the object representing this workflow run
           workflowRunObj=$(gh api -H "Accept: application/vnd.github+json" '/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}' | jq '.')
