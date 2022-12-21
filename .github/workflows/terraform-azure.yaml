@@ -201,6 +201,8 @@ jobs:
               echo "::error::Detected old workflow run"
               echo "::warning::Detected old workflow run. Skipping apply"
               echo "SKIP_APPLY=true" >> $GITHUB_ENV
+              
+              echo "*Skipping `terraform apply` as a more recent workflow run exists.*" >> $GITHUB_STEP_SUMMARY
               #exit 1
           fi
 
