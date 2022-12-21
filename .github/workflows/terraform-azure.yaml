@@ -167,43 +167,42 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          workflowRun=$(gh api -H "Accept: application/vnd.github+json" '/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}' | jq '.')
+          # Gets the object representing this workflow run
+          workflowRunObj=$(gh api -H "Accept: application/vnd.github+json" '/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}' | jq '.')
           
           echo "::group::Current workflow run"
-          echo "$workflowRun"
+          echo "$workflowRunObj"
           echo "::endgroup::"
           
-          run_id=$(echo $workflowRun | jq .id -r)
-          workflowId=$(echo $workflowRun | jq .workflow_id -r)
-          workflowRunNumber=$(echo $workflowRun | jq .run_number -r)
+          workflowId=$(echo $workflowRunObj | jq '.workflow_id' -r)
+          workflowRunNumber=$(echo $workflowRunObj | jq '.run_number' -r)
           
+          # Gets the workflow runs for this workflow
           workflowRuns=$(gh api -H "Accept: application/vnd.github+json" /repos/${{ github.repository }}/actions/workflows/$workflowId/runs)
           
+          # Gets the filtered runs for this workflow that pushed to the apply branch - as we don't care about pull request tf plan runs
           latestRuns="$(echo $workflowRuns | jq '.workflow_runs | map(select(.event == "push" and .head_branch == "${{inputs.tf_apply_branch}}") ) | map ({id, run_number, display_title, run_started_at, run_attempt, event, head_branch})')"
+          
           echo "::group::Latest workflow runs"
           echo "$latestRuns"
           echo "::endgroup::"
           
-          latestRun=$(echo $latestRuns | jq 'max_by(.run_number)')
+          # Get the latest run object
+          latestRunObj=$(echo $latestRuns | jq 'max_by(.run_number)')
           
           echo "::group::Latest workflow run"
-          echo "$latestRun"
+          echo "$latestRunObj"
           echo "::endgroup::"
           
-          latestRunNumber=$(echo $latestRun | jq '.run_number' -r)
+          latestRunNumber=$(echo $latestRunObj | jq '.run_number' -r)
           
           if [[ "$latestRunNumber" == "$workflowRunNumber" ]]; then
               echo "Confirmed this is the latest workflow run"
-              echo "SKIP_APPLY=false" >> $GITHUB_ENV
-              
           else
               echo "We are running an old workflow. Abandon ship"
-              echo "::error::Detected old workflow run"
               echo "::warning::Detected old workflow run. Skipping apply"
               echo "SKIP_APPLY=true" >> $GITHUB_ENV
-              
               echo ":warning: Skipping terraform apply as a more recent workflow run exists." >> $GITHUB_STEP_SUMMARY
-              #exit 1
           fi
 
       - name: Terraform Apply
