@@ -175,8 +175,26 @@ jobs:
           workflow_id=$(echo $workflow_run_obj | jq .workflow_id -r)
           workflow_run_number=$(echo $workflow_run_obj | jq .run_number -r)
           
+          workflow_runs=$(gh api -H "Accept: application/vnd.github+json" /repos/${{ github.repository }}/actions/workflows/$workflow_id/runs)
+          
+          echo "$($workflow_runs |  | jq '.workflow_runs | map(select(.event == "push" and .head_branch == "main") ) | map ({id, run_number, display_title, run_started_at, run_attempt, event, head_branch}) | max_by(.run_number))"
+          
           echo "Blah. Workflow id is $workflow_id, run id $run_id, run number $workflow_run_number"
-          gh api -H "Accept: application/vnd.github+json" /repos/${{ github.repository }}/actions/workflows/$workflow_id/runs | jq '.workflow_runs | map ({id, run_number, display_title, run_started_at, event, head_branch})'
+          
+          latestRun=$(echo $workflow_runs | jq '.workflow_runs | map(select(.event == "push" and .head_branch == "main") ) | map ({id, run_number, display_title, run_started_at, run_attempt, event, head_branch}) | max_by(.run_number)' -r)
+          
+          echo "Latest run: 
+          $latestRun"
+          
+          latestRunNumber=$(echo $latestRun | jq '.run_number' -r)
+          
+          if [[ "$latestRunNumber" == "$workflow_run_number" ]]; then
+              echo "We the latest workflow run!"
+          else
+              echo "We are running an old workflow. Abandon ship"
+              echo "::error::Detected old workflow run"
+              exit 1
+          fi
           
           git log -5
           git fetch --update-shallow -v
