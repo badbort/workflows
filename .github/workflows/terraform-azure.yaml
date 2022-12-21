@@ -162,8 +162,7 @@ jobs:
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
-      - name: Check latest on branch
-        if: format('refs/heads/{0}', inputs.tf_apply_branch) == github.ref && github.event_name == 'push'
+      - name: Fail for out-of-date workflow run
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -199,10 +198,9 @@ jobs:
           if [[ "$latestRunNumber" == "$workflowRunNumber" ]]; then
               echo "Confirmed this is the latest workflow run"
           else
-              echo "We are running an old workflow. Abandon ship"
-              echo "::warning::Detected old workflow run. Skipping apply"
-              echo "SKIP_APPLY=true" >> $GITHUB_ENV
-              echo ":warning: Skipping terraform apply as a more recent workflow run exists." >> $GITHUB_STEP_SUMMARY
+              echo "::error::Detected a more recent workflow run. Exiting with failure to prevent out of date commits being applied"
+              echo ":warning: Failing terraform apply workflow as a more recent workflow run exists" >> $GITHUB_STEP_SUMMARY
+              exit 1
           fi
 
       - name: Terraform Apply
