@@ -6,6 +6,14 @@ on:
         type: string
         description: Directory of the terraform root module. Defaults to the root of the repo
         default: './'
+      
+      prevent_old_runs:
+        required: false
+        type: boolean
+        default: false
+        description: >
+          When enabled the terraform apply job will fail if it detects more recent workflow runs. This should prevent
+          resources from being accidently destroyed when re-running a workflow on an older commit.        
         
       tf_apply_branch:
         required: true
@@ -163,6 +171,7 @@ jobs:
         run: exit 1
 
       - name: Fail for out-of-date workflow run
+        if: inputs.prevent_old_runs == true
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
