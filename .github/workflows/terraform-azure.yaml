@@ -63,7 +63,13 @@ on:
         description: "The Subscription ID in which the Terraform state storage account exists."
       GH_READ_TOKEN: 
         required: false
-        description: "The GitHub token to use for the run"
+        description: "The GitHub token to use for the run necessary to avoid rerunning old worflows and potentially destroying infra"
+      SECRET_ENV:
+        description: |
+          Additional secret environment variables defined as key=value and newline separated. Can be used to 
+          pass secrets into tf variables, for example: TF_VAR_secret_api_token=${{secrets.secret_api_token}}
+        required: false
+      
 
 jobs:
   terraform:
@@ -81,6 +87,29 @@ jobs:
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
     steps:
+      - name: Setup secret environment variables
+        shell: pwsh
+        run: |
+          $secretEnv = @"
+          ${{secrets.SECRET_ENV}}
+          "@
+          
+          foreach($line in $secretEnv.Split("`n"))
+          {
+              if([string]::IsNullOrEmpty($line))
+              {
+                  continue
+              }
+              
+              $key,$value = $line -split '=',2
+              if($key -and $value)
+              {
+                  Write-Output "Adding secret environment variable '$key'"
+                  Write-Output "::add-mask::$value"
+                  "$key=$value" >> $env:GITHUB_ENV
+              }
+          }
+          
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
