@@ -6,6 +6,18 @@ on:
         type: string
         description: Directory of the terraform root module. Defaults to the root of the repo
         default: './'
+        
+      tf_plan_args:
+        required: false
+        type: string
+        default: ''
+        description: Args applied to terraform apply
+        
+      tf_apply_args:
+        required: false
+        type: string
+        default: ''
+        description: Args applied to terraform apply
       
       prevent_old_runs:
         required: false
@@ -125,7 +137,7 @@ jobs:
       - name: Terraform Plan
         id: plan
         if: github.event_name == 'pull_request'
-        run: terraform plan -no-color -input=false
+        run: terraform plan -no-color -input=false ${{inputs.tf_plan_args}}
         continue-on-error: true
 
       - uses: actions/github-script@v6
@@ -217,4 +229,4 @@ jobs:
         run: |
           echo "ref  ${{ github.ref }}"
           pwd
-          terraform apply -auto-approve -input=false
+          terraform apply -auto-approve -input=false ${{inputs.tf_apply_args}}
