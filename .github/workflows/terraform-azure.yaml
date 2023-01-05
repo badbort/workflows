@@ -33,7 +33,7 @@ on:
         description: The branch that is being deployed
         default: main
         
-      mutex-branch:
+      mutex_branch:
         required: false
         type: string
         description: |
@@ -123,10 +123,10 @@ jobs:
         run: terraform fmt -check
           
       - name: Set up mutex
-        if: inputs.mutex-branch != ''
+        if: inputs.mutex_branch != ''
         uses: ben-z/gh-action-mutex@v1.0-alpha-7
         with:
-          branch: ${{ inputs.mutex-branch }}
+          branch: ${{ inputs.mutex_branch }}
         
       - run: |
           if [ -z "${{secrets.AZURE_CREDENTIALS}}" ]
