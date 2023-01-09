@@ -4,7 +4,7 @@ on:
       directory:
         required: false
         type: string
-        description: Directory of the terraform root module. Defaults to the root of the repo
+        description: Directory of the terraform root module. Def  aults to the root of the repo
         default: './'
         
       tf_plan_args:
@@ -238,7 +238,7 @@ jobs:
           workflowRuns=$(gh api -H "Accept: application/vnd.github+json" /repos/${{ github.repository }}/actions/workflows/$workflowId/runs)
           
           # Gets the filtered runs for this workflow that pushed to the apply branch - as we don't care about pull request tf plan runs
-          latestRuns="$(echo $workflowRuns | jq '.workflow_runs | map(select(.event == "push" and .head_branch == "${{inputs.tf_apply_branch}}") ) | map ({id, run_number, display_title, run_started_at, run_attempt, event, head_branch})')"
+          latestRuns="$(echo $workflowRuns | jq '.workflow_runs | map(select(.head_branch == "${{inputs.tf_apply_branch}}") ) | map ({id, run_number, display_title, run_started_at, run_attempt, event, head_branch})')"
           
           echo "::group::Latest workflow runs"
           echo "$latestRuns"
