@@ -145,10 +145,14 @@ jobs:
                 echo "USE_AZURE_CREDENTIALS=true" >> $GITHUB_ENV
                 echo "az login will use AZURE_CREDENTIALS env var"
           fi
-          
-          echo "${{github.ref}}"
-          echo "${{toJSON(github)}}"
 
+      - name: Debug
+        env:
+          GITHUB_DEBUG: "${{toJSON(github)}}"
+        run:
+          echo "${{github.ref}}"
+          echo $GITHUB_DEBUG
+      
       - name: Log in to Azure using credentials secret
         if: env.USE_AZURE_CREDENTIALS == true
         uses: azure/login@v1
