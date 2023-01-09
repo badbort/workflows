@@ -45,6 +45,12 @@ on:
         type: string
         description: "The GitHub environment being deployed to"
         
+      debug:
+        description: Debug Mode, true or false
+        type: string
+        required: false
+        default: false
+        
     secrets:
       AZURE_TENANT_ID:
         required: true
@@ -85,6 +91,7 @@ jobs:
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      TF_LOG: ${{ ( inputs.debug == true || secrets.ACTIONS_RUNNER_DEBUG == 'true' ) && 'TRACE' || '' }}
 
     steps:
       - name: Setup secret environment variables
@@ -128,7 +135,8 @@ jobs:
         with:
           branch: ${{ inputs.mutex_branch }}
         
-      - run: |
+      - name: Azure Login
+        run: |
           if [ -z "${{secrets.AZURE_CREDENTIALS}}" ]
           then
                 echo "USE_AZURE_CREDENTIALS=false" >> $GITHUB_ENV
@@ -137,6 +145,9 @@ jobs:
                 echo "USE_AZURE_CREDENTIALS=true" >> $GITHUB_ENV
                 echo "az login will use AZURE_CREDENTIALS env var"
           fi
+          
+          echo "${{github.ref}}"
+          echo "${{toJSON(github)}}"
 
       - name: Log in to Azure using credentials secret
         if: env.USE_AZURE_CREDENTIALS == true
