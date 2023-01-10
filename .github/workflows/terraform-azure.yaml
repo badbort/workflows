@@ -112,6 +112,7 @@ jobs:
           token: ${{ secrets.GH_READ_TOKEN }}
           
       - name: Checkout Code
+        if: ${{ env.GH_READ_TOKEN == '' }}
         uses: actions/checkout@v3
           
       - name: Setup secret environment variables
