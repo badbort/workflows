@@ -101,7 +101,7 @@ jobs:
           $token = "${{secrets.GH_READ_TOKEN}}"
           if(![string]::IsNullOrEmpty($token))
           {
-              Write-Output $token >> $env:GITHUB_ENV
+              Write-Output "GH_READ_TOKEN=$token" >> $env:GITHUB_ENV
           }   
     
       - name: Checkout Code with Submodules
