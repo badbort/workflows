@@ -97,7 +97,7 @@ jobs:
     
       - name: Checkout Code with Submodules
         uses: actions/checkout@v3
-        if: ${{ env.GH_READ_TOKEN }}
+        if: ${{ secrets.GH_READ_TOKEN }} 
         with:
           submodules: true
           token: ${{ secrets.GH_READ_TOKEN }}
