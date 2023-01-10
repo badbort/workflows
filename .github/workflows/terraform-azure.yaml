@@ -94,10 +94,16 @@ jobs:
       TF_LOG: ${{ ( inputs.debug == true || secrets.ACTIONS_RUNNER_DEBUG == 'true' ) && 'TRACE' || '' }}
 
     steps:
+    
+      - name: Checkout Code with Submodules
+        uses: actions/checkout@v3
+        if: ${{ env.GH_READ_TOKEN }}
+        with:
+          submodules: true
+          token: ${{ secrets.GH_READ_TOKEN }}
+          
       - name: Checkout Code
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
           
       - name: Setup secret environment variables
         shell: pwsh
