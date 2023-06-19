@@ -1,0 +1,58 @@
+parameters:
+  - name: solution
+  - name: project
+  - name: buildConfiguration
+    default: 'Release'
+  - name: version
+    default: '6.x'
+  - name: testRunner # Allowed values: JUnit, NUnit, VSTest, XUnit, CTest
+    default: VSTest
+
+jobs:
+- job: Build
+  displayName: 'Build'
+  pool:
+    vmImage: 'windows-latest'
+  steps:
+  - task: UseDotNet@2
+    displayName: ".NET 6.x"
+    inputs:
+      version: "6.x"
+      packageType: sdk
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Restore'
+    inputs:
+      sdk: ${{ parameters.solution }}
+      command: 'restore'
+      projects: ${{ parameters.solution }}
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Build'
+    inputs:
+      sdk: "6.x"      
+      command: 'build'
+      projects: ${{ parameters.solution }}
+      arguments: '--configuration ${{ parameters.buildConfiguration }}'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Test'
+    inputs:
+      command: 'test'
+      projects: '${{ parameters.solution }}'
+      arguments: '--configuration ${{ parameters.buildConfiguration }}'
+
+  - task: DotNetCoreCLI@2
+    displayName: Publish
+    inputs:
+      command: publish
+      projects: '${{ parameters.project }}'
+      arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+      zipAfterPublish: True
+      publishWebProjects: False
+  
+  - task: PublishBuildArtifacts@1
+    displayName: Publish Artifact
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: drop

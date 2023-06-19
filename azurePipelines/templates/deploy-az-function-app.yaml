@@ -1,0 +1,74 @@
+parameters:
+  - name: dependsOn
+    type: string
+    
+  - name: environmentName
+    type: string
+    
+  - name: serviceConnection
+    type: string
+    
+  - name: functionAppName
+    type: string
+
+  - name: adAppIdUri
+    
+  - name: buildConfiguration
+    default: 'Release'
+
+  - name: appSettings
+    default: ''
+
+  - name: postmanCollection
+    default: ''
+
+  - name: postmanArgs
+    
+jobs:  
+  - deployment: Deploy
+    displayName: 'Deploy ${{ parameters.environmentName }}'
+    environment: ${{ parameters.environmentName }}
+    pool:
+      vmImage: 'windows-latest'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - script: |
+              echo "Function: ${{ parameters.functionAppName }}"
+              echo "postmanCollection: ${{ parameters.postmanCollection }}"
+              echo "variables[parameterspostmanCollection]: ${{ variables[parameters.postmanCollection] }}"
+              ls -R
+
+            # Deploy the function
+          - task: AzureFunctionApp@2
+            displayName: 'Azure App Service Deploy'
+            inputs:
+              azureSubscription: '${{ parameters.serviceConnection }}'
+              appType: 'functionAppLinux'
+              appName: '${{ parameters.functionAppName }}'
+              package: '$(Pipeline.Workspace)/drop/*.zip'
+              runtimeStack: DOTNET|6.0
+              appSettings: '$(appSettings)'
+
+            # Checkout repo so we can run postman colletions or other tests from within the repo. Release pipelines dont automatically checkout the repo
+          - checkout: self
+
+            # Get an access token for the function app allowing us to authenticate with its api
+          - task: AzurePowerShell@5
+            inputs:
+              azureSubscription: ${{ parameters.serviceConnection }}
+              scriptType: 'inlineScript'
+              inline: |
+                Import-Module Az.Accounts
+                $access_token = (Get-AzAccessToken -ResourceUrl ${{parameters.adAppIdUri}}).Token
+                Write-Host "##vso[task.setvariable variable=AzureAccessToken;issecret=true]$access_token"
+              azurePowerShellVersion: 'latestVersion'
+
+          - script: |
+              npm install newman
+            
+            # Run postman collection
+          - script: |
+              newman run ${{ parameters.postmanCollection }} ${{parameters.postmanArgs}} --global-var "AccessToken=$(AzureAccessToken)"
+            condition: and(succeeded(), ne('${{ parameters.postmanCollection }}', ''), ne('${{ parameters.postmanCollection }}', 'null'))
