@@ -1,0 +1,109 @@
+parameters:
+  - name: solutionPath
+    displayName: Visual Studio Solution Path
+    type: string
+
+  - name: projectPath
+    displayName: App CSProj File Path
+    type: string
+
+  - name: buildConfiguration
+    displayName: Build Configuration Profile
+    type: string
+    default: 'Release'
+
+  - name: dotNetVersion
+    displayName: DotNet Version
+    default: '6.x'
+
+  - name: serviceConnectionDev
+    displayName: DevService Connection Name
+    type: string
+
+  - name: serviceConnectionPrd
+    displayName: Production Service Connection Name
+    type: string
+    
+  - name: functionAppNameDev
+    displayName: Dev Function App Name
+    type: string
+
+  - name: functionAppNamePrd
+    displayName: Production Function App Name
+    type: string
+
+  - name: adAppIdUriDev
+    displayName: Dev AAD App Id Uri
+    type: string
+
+  - name: adAppIdUriPrd
+    displayName: Production AAD App Id Uri
+    type: string
+
+  - name: runtimeStack
+    displayName: Runtime Stacak
+    type: string
+    default: DOTNET|6.0
+
+  - name: appSettings
+    displayName: Application Settings
+    type: string
+    default: ''
+
+  - name: postmanCollection
+    displayName: Postman Collection File Path
+    type: string
+    default: ''
+
+  - name: postmanArgsDev
+    displayName: Dev Postman Extra Command Line Args
+    type: string
+    default: ''
+
+  - name: postmanArgsPrd
+    displayName: Production Postman Extra Command Line Args
+    type: string
+    default: ''
+
+stages:
+- stage: BuildDev
+  displayName: 'Build and Test DEV'
+  jobs:
+  - template: azurePipelines/templates/build-publish-dotnet.yaml@templates
+    parameters:
+      solutionPath: ${{ parameters.solutionPath }}
+      projectPath: ${{ parameters.projectPath }}
+      buildConfiguration: ${{ parameters.buildConfiguration }}
+      version: ${{ parameters.dotNetVersion }}
+
+- stage: DeployDEV
+  displayName: 'Deploy App Dev'
+  dependsOn: BuildAndTest
+  jobs:
+  - template: azurePipelines/templates/deploy-az-function-app.yaml@templates
+    parameters:
+      dependsOn: BuildDev
+      environmentName: DEV
+      serviceConnection: ${{ parameters.serviceConnectionDev }}
+      functionAppName: ${{ parameters.functionAppNameDev }}
+      adAppIdUri: ${{ parameters.adAppIdUriDev }}
+      runtimeStack: ${{ parameters.runtimeStack }}
+      appSettings: ${{ parameters.appSettings }}
+      postmanCollection: ${{ parameters.postmanCollection }}
+      postmanArgs: ${{ parameters.postmanArgsDev }}
+      
+- stage: DeployPRD
+  displayName: 'Deploy App Production'
+  dependsOn: DeployDEV
+  jobs:
+  - template: azurePipelines/templates/deploy-az-function-app.yaml@templates
+    parameters:
+      dependsOn: BuildDev
+      environmentName: PRD
+      serviceConnection: ${{ parameters.serviceConnectionPrd }}
+      functionAppName: ${{ parameters.functionAppNamePrd }}
+      adAppIdUri: ${{ parameters.adAppIdUriPrd }}
+      runtimeStack: ${{ parameters.runtimeStack }}
+      appSettings: ${{ parameters.appSettings }}
+      postmanCollection: ${{ parameters.postmanCollection }}
+      postmanArgs: ${{ parameters.postmanArgsPrd }}
