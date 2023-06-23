@@ -1,28 +1,43 @@
 parameters:
   - name: dependsOn
+    displayName: Depends On
     type: string
     
   - name: environmentName
+    displayName: Environment Name
     type: string
     
   - name: serviceConnection
+    displayName: Service Connection Name
     type: string
     
   - name: functionAppName
+    displayName: Function App Name
     type: string
 
   - name: adAppIdUri
-    
-  - name: buildConfiguration
-    default: 'Release'
+    displayName: AAD App Id Uri
+    type: string
+
+  - name: runtimeStack
+    displayName: Runtime Stacak
+    type: string
+    default: DOTNET|6.0
 
   - name: appSettings
+    displayName: Application Settings
+    type: string
     default: ''
 
   - name: postmanCollection
+    displayName: Postman Collection File Path
+    type: string
     default: ''
 
   - name: postmanArgs
+    displayName: Postman Extra Command Line Args
+    type: string
+    default: ''
     
 jobs:  
   - deployment: Deploy
@@ -34,12 +49,6 @@ jobs:
       runOnce:
         deploy:
           steps:
-          - script: |
-              echo "Function: ${{ parameters.functionAppName }}"
-              echo "postmanCollection: ${{ parameters.postmanCollection }}"
-              echo "variables[parameterspostmanCollection]: ${{ variables[parameters.postmanCollection] }}"
-              ls -R
-
             # Deploy the function
           - task: AzureFunctionApp@2
             displayName: 'Azure App Service Deploy'
@@ -48,13 +57,13 @@ jobs:
               appType: 'functionAppLinux'
               appName: '${{ parameters.functionAppName }}'
               package: '$(Pipeline.Workspace)/drop/*.zip'
-              runtimeStack: DOTNET|6.0
-              appSettings: '$(appSettings)'
+              runtimeStack: ${{ parameters.runtimeStack }}
+              appSettings: '${{ parameters.appSettings }}'
 
-            # Checkout repo so we can run postman colletions or other tests from within the repo. Release pipelines dont automatically checkout the repo
+            # Checkout repo so we can get postman colletion file. Release pipelines dont automatically checkout the repo
           - checkout: self
 
-            # Get an access token for the function app allowing us to authenticate with its api
+            # Get an access token for the deployed function app allowing us to authenticate with ad and run tests
           - task: AzurePowerShell@5
             inputs:
               azureSubscription: ${{ parameters.serviceConnection }}
@@ -67,8 +76,9 @@ jobs:
 
           - script: |
               npm install newman
+            displayName: Install Newman
             
-            # Run postman collection
           - script: |
               newman run ${{ parameters.postmanCollection }} ${{parameters.postmanArgs}} --global-var "AccessToken=$(AzureAccessToken)"
+            displayName: Perform Postman Integration Tests
             condition: and(succeeded(), ne('${{ parameters.postmanCollection }}', ''), ne('${{ parameters.postmanCollection }}', 'null'))

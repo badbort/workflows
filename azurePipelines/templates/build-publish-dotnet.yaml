@@ -1,12 +1,20 @@
 parameters:
-  - name: solution
-  - name: project
+  - name: solutionPath
+    displayName: Visual Studio Solution Path
+    type: string
+
+  - name: projectPath
+    displayName: App CSProj File Path
+    type: string
+
   - name: buildConfiguration
+    displayName: Build Configuration Profile
+    type: string
     default: 'Release'
+
   - name: version
+    displayName: DotNet Version
     default: '6.x'
-  - name: testRunner # Allowed values: JUnit, NUnit, VSTest, XUnit, CTest
-    default: VSTest
 
 jobs:
 - job: Build
@@ -14,35 +22,32 @@ jobs:
   pool:
     vmImage: 'windows-latest'
   steps:
-  - script: |
-      echo "Hello 123"
-
   - task: UseDotNet@2
-    displayName: ".NET 6.x"
+    displayName: "Install .NET 6.x"
     inputs:
-      version: "6.x"
+      version: ${{ parameters.version }}
       packageType: sdk
 
   - task: DotNetCoreCLI@2
     displayName: 'Restore'
     inputs:
-      sdk: ${{ parameters.solution }}
+      sdk: ${{ parameters.solutionPath }}
       command: 'restore'
       projects: ${{ parameters.solution }}
 
   - task: DotNetCoreCLI@2
     displayName: 'Build'
     inputs:
-      sdk: "6.x"      
+      sdk: ${{ parameters.version }} 
       command: 'build'
-      projects: ${{ parameters.solution }}
+      projects: ${{ parameters.solutionPath }}
       arguments: '--configuration ${{ parameters.buildConfiguration }}'
 
   - task: DotNetCoreCLI@2
     displayName: 'Test'
     inputs:
       command: 'test'
-      projects: '${{ parameters.solution }}'
+      projects: '${{ parameters.solutionPath }}'
       arguments: '--configuration ${{ parameters.buildConfiguration }}'
 
   - task: DotNetCoreCLI@2
