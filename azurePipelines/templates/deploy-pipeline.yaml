@@ -66,8 +66,8 @@ parameters:
     default: ''
 
 stages:
-- stage: BuildDev
-  displayName: 'Build and Test DEV'
+- stage: BuildAndTest
+  displayName: 'Build and Test'
   jobs:
   - template: build-publish-dotnet.yaml
     parameters:
@@ -82,7 +82,6 @@ stages:
   jobs:
   - template: deploy-az-function-app.yaml
     parameters:
-      dependsOn: BuildDev
       environmentName: DEV
       serviceConnection: ${{ parameters.serviceConnectionDev }}
       functionAppName: ${{ parameters.functionAppNameDev }}
@@ -98,7 +97,6 @@ stages:
   jobs:
   - template: deploy-az-function-app.yaml
     parameters:
-      dependsOn: BuildDev
       environmentName: PRD
       serviceConnection: ${{ parameters.serviceConnectionPrd }}
       functionAppName: ${{ parameters.functionAppNamePrd }}

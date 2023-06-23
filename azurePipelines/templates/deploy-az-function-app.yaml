@@ -1,8 +1,4 @@
 parameters:
-  - name: dependsOn
-    displayName: Depends On
-    type: string
-    
   - name: environmentName
     displayName: Environment Name
     type: string
