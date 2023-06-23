@@ -69,7 +69,7 @@ stages:
 - stage: BuildDev
   displayName: 'Build and Test DEV'
   jobs:
-  - template: azurePipelines/templates/build-publish-dotnet.yaml@templates
+  - template: build-publish-dotnet.yaml
     parameters:
       solutionPath: ${{ parameters.solutionPath }}
       projectPath: ${{ parameters.projectPath }}
@@ -80,7 +80,7 @@ stages:
   displayName: 'Deploy App Dev'
   dependsOn: BuildAndTest
   jobs:
-  - template: azurePipelines/templates/deploy-az-function-app.yaml@templates
+  - template: deploy-az-function-app.yaml
     parameters:
       dependsOn: BuildDev
       environmentName: DEV
@@ -96,7 +96,7 @@ stages:
   displayName: 'Deploy App Production'
   dependsOn: DeployDEV
   jobs:
-  - template: azurePipelines/templates/deploy-az-function-app.yaml@templates
+  - template: deploy-az-function-app.yaml
     parameters:
       dependsOn: BuildDev
       environmentName: PRD
