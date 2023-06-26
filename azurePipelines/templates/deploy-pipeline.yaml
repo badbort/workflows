@@ -48,6 +48,22 @@ parameters:
     displayName: Production Function App Name
     type: string
 
+  - name: functionAppUrlDev
+    displayName: Dev Function App Url
+    type: string
+    
+  - name: functionAppUrlSIT
+    displayName: SIT Function App Url
+    type: string
+    
+  - name: functionAppUrlUAT
+    displayName: UAT FFunction App Url
+    type: string
+
+  - name: functionAppUrlPrd
+    displayName: Production Function App Url
+    type: string
+
   - name: adAppIdUriDev
     displayName: Dev AAD App Id Uri
     type: string
@@ -123,7 +139,7 @@ stages:
         runtimeStack: ${{ parameters.runtimeStack }}
         appSettings: ${{ parameters.appSettings }}
         postmanCollection: ${{ parameters.postmanCollection }}
-        postmanArgs: ${{ parameters.postmanArgsDev }}
+        postmanArgs: ${{ parameters.postmanArgsDev }} --global-var URL=${{ parameters.functionAppUrlDev }}
         
   - stage: DeploySIT
     displayName: 'Deploy App to SIT'
@@ -138,7 +154,7 @@ stages:
         runtimeStack: ${{ parameters.runtimeStack }}
         appSettings: ${{ parameters.appSettings }}
         postmanCollection: ${{ parameters.postmanCollection }}
-        postmanArgs: ${{ parameters.postmanArgsSIT }}
+        postmanArgs: ${{ parameters.postmanArgsSIT }} --global-var URL=${{ parameters.functionAppUrlSIT }}
 
   - stage: DeployUAT
     displayName: 'Deploy App to UAT'
@@ -153,7 +169,7 @@ stages:
         runtimeStack: ${{ parameters.runtimeStack }}
         appSettings: ${{ parameters.appSettings }}
         postmanCollection: ${{ parameters.postmanCollection }}
-        postmanArgs: ${{ parameters.postmanArgsUAT }}
+        postmanArgs: ${{ parameters.postmanArgsUAT }} --global-var URL=${{ parameters.functionAppUrlUAT }}
 
   - stage: DeployPRD
     displayName: 'Deploy App to Production'
@@ -168,4 +184,4 @@ stages:
         runtimeStack: ${{ parameters.runtimeStack }}
         appSettings: ${{ parameters.appSettings }}
         postmanCollection: ${{ parameters.postmanCollection }}
-        postmanArgs: ${{ parameters.postmanArgsPrd }}
+        postmanArgs: ${{ parameters.postmanArgsPrd }} --global-var URL=${{ parameters.functionAppUrlPrd }}
