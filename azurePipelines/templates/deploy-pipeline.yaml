@@ -20,12 +20,28 @@ parameters:
     displayName: DevService Connection Name
     type: string
 
+  - name: serviceConnectionSIT
+    displayName: SIT Service Connection Name
+    type: string
+
+  - name: serviceConnectionUAT
+    displayName: UAT Service Connection Name
+    type: string
+
   - name: serviceConnectionPrd
     displayName: Production Service Connection Name
     type: string
     
   - name: functionAppNameDev
     displayName: Dev Function App Name
+    type: string
+    
+  - name: functionAppNameSIT
+    displayName: SIT Function App Name
+    type: string
+    
+  - name: functionAppNameUAT
+    displayName: UAT Function App Name
     type: string
 
   - name: functionAppNamePrd
@@ -34,6 +50,14 @@ parameters:
 
   - name: adAppIdUriDev
     displayName: Dev AAD App Id Uri
+    type: string
+
+  - name: adAppIdUriSIT
+    displayName: SIT AAD App Id Uri
+    type: string
+
+  - name: adAppIdUriUAT
+    displayName: UAT AAD App Id Uri
     type: string
 
   - name: adAppIdUriPrd
@@ -60,8 +84,13 @@ parameters:
     type: string
     default: ''
 
+  - name: postmanArgsSIT
+    displayName: SIT Postman Extra Command Line Args
+    type: string
+    default: ''
+
   - name: postmanArgsUAT
-    displayName: Dev Postman Extra Command Line Args
+    displayName: UAT Postman Extra Command Line Args
     type: string
     default: ''
 
