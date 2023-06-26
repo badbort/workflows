@@ -15,6 +15,7 @@ parameters:
     displayName: AAD App Id Uri
     type: string
 
+    #runtimeStack: # 'DOTNET|2.2' | 'DOTNET|3.1' | 'DOTNET|6.0' | 'DOTNET-ISOLATED|7.0'
   - name: runtimeStack
     displayName: Runtime Stacak
     type: string
@@ -36,7 +37,7 @@ parameters:
     default: ''
     
 jobs:  
-  - deployment: Deploy
+  - deployment: 'Deploy_${{ parameters.environmentName }}'
     displayName: 'Deploy ${{ parameters.environmentName }}'
     environment: ${{ parameters.environmentName }}
     pool:
@@ -46,6 +47,7 @@ jobs:
         deploy:
           steps:
             # Deploy the function
+            # See: https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/azure-function-app-v2?view=azure-pipelines
           - task: AzureFunctionApp@2
             displayName: 'Azure App Service Deploy'
             inputs:

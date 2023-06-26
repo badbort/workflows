@@ -60,48 +60,83 @@ parameters:
     type: string
     default: ''
 
+  - name: postmanArgsUAT
+    displayName: Dev Postman Extra Command Line Args
+    type: string
+    default: ''
+
   - name: postmanArgsPrd
     displayName: Production Postman Extra Command Line Args
     type: string
     default: ''
 
 stages:
-- stage: BuildAndTest
-  displayName: 'Build and Test'
-  jobs:
-  - template: build-publish-dotnet.yaml
-    parameters:
-      solutionPath: ${{ parameters.solutionPath }}
-      projectPath: ${{ parameters.projectPath }}
-      buildConfiguration: ${{ parameters.buildConfiguration }}
-      version: ${{ parameters.dotNetVersion }}
+  - stage: BuildAndTest
+    displayName: 'Build and Test'
+    jobs:
+    - template: build-publish-dotnet.yaml
+      parameters:
+        solutionPath: ${{ parameters.solutionPath }}
+        projectPath: ${{ parameters.projectPath }}
+        buildConfiguration: ${{ parameters.buildConfiguration }}
+        version: ${{ parameters.dotNetVersion }}
 
-- stage: DeployDEV
-  displayName: 'Deploy App Dev'
-  dependsOn: BuildAndTest
-  jobs:
-  - template: deploy-az-function-app.yaml
-    parameters:
-      environmentName: DEV
-      serviceConnection: ${{ parameters.serviceConnectionDev }}
-      functionAppName: ${{ parameters.functionAppNameDev }}
-      adAppIdUri: ${{ parameters.adAppIdUriDev }}
-      runtimeStack: ${{ parameters.runtimeStack }}
-      appSettings: ${{ parameters.appSettings }}
-      postmanCollection: ${{ parameters.postmanCollection }}
-      postmanArgs: ${{ parameters.postmanArgsDev }}
-      
-- stage: DeployPRD
-  displayName: 'Deploy App Production'
-  dependsOn: DeployDEV
-  jobs:
-  - template: deploy-az-function-app.yaml
-    parameters:
-      environmentName: PRD
-      serviceConnection: ${{ parameters.serviceConnectionPrd }}
-      functionAppName: ${{ parameters.functionAppNamePrd }}
-      adAppIdUri: ${{ parameters.adAppIdUriPrd }}
-      runtimeStack: ${{ parameters.runtimeStack }}
-      appSettings: ${{ parameters.appSettings }}
-      postmanCollection: ${{ parameters.postmanCollection }}
-      postmanArgs: ${{ parameters.postmanArgsPrd }}
+  - stage: DeployDEV
+    displayName: 'Deploy App to Dev'
+    dependsOn: BuildAndTest
+    jobs:
+    - template: deploy-az-function-app.yaml
+      parameters:
+        environmentName: DEV
+        serviceConnection: ${{ parameters.serviceConnectionDev }}
+        functionAppName: ${{ parameters.functionAppNameDev }}
+        adAppIdUri: ${{ parameters.adAppIdUriDev }}
+        runtimeStack: ${{ parameters.runtimeStack }}
+        appSettings: ${{ parameters.appSettings }}
+        postmanCollection: ${{ parameters.postmanCollection }}
+        postmanArgs: ${{ parameters.postmanArgsDev }}
+        
+  - stage: DeploySIT
+    displayName: 'Deploy App to SIT'
+    dependsOn: DeployDEV
+    jobs:
+    - template: deploy-az-function-app.yaml
+      parameters:
+        environmentName: SIT
+        serviceConnection: ${{ parameters.serviceConnectionPrd }}
+        functionAppName: ${{ parameters.functionAppNameSIT }}
+        adAppIdUri: ${{ parameters.adAppIdUriSIT }}
+        runtimeStack: ${{ parameters.runtimeStack }}
+        appSettings: ${{ parameters.appSettings }}
+        postmanCollection: ${{ parameters.postmanCollection }}
+        postmanArgs: ${{ parameters.postmanArgsSIT }}
+
+  - stage: DeployUAT
+    displayName: 'Deploy App to UAT'
+    dependsOn: DeploySIT
+    jobs:
+    - template: deploy-az-function-app.yaml
+      parameters:
+        environmentName: UAT
+        serviceConnection: ${{ parameters.serviceConnectionUAT }}
+        functionAppName: ${{ parameters.functionAppNameUAT }}
+        adAppIdUri: ${{ parameters.adAppIdUriUAT }}
+        runtimeStack: ${{ parameters.runtimeStack }}
+        appSettings: ${{ parameters.appSettings }}
+        postmanCollection: ${{ parameters.postmanCollection }}
+        postmanArgs: ${{ parameters.postmanArgsUAT }}
+
+  - stage: DeployPRD
+    displayName: 'Deploy App to Production'
+    dependsOn: DeployUAT
+    jobs:
+    - template: deploy-az-function-app.yaml
+      parameters:
+        environmentName: PRD
+        serviceConnection: ${{ parameters.serviceConnectionPrd }}
+        functionAppName: ${{ parameters.functionAppNamePrd }}
+        adAppIdUri: ${{ parameters.adAppIdUriPrd }}
+        runtimeStack: ${{ parameters.runtimeStack }}
+        appSettings: ${{ parameters.appSettings }}
+        postmanCollection: ${{ parameters.postmanCollection }}
+        postmanArgs: ${{ parameters.postmanArgsPrd }}
