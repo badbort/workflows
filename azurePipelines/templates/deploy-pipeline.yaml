@@ -12,6 +12,11 @@ parameters:
     type: string
     default: 'Release'
 
+  - name: defaultBranch
+    displayName: Default branch of the git repository
+    type: string
+    default: main
+
   - name: dotNetVersion
     displayName: DotNet Version
     default: '6.x'
@@ -85,8 +90,23 @@ parameters:
     type: string
     default: DOTNET|6.0
 
-  - name: appSettings
-    displayName: Application Settings
+  - name: appSettingsDev
+    displayName: Application Settings DEV
+    type: string
+    default: ''
+
+  - name: appSettingsSIT
+    displayName: Application Settings SIT
+    type: string
+    default: ''
+
+  - name: appSettingsUAT
+    displayName: Application Settings UAT
+    type: string
+    default: ''
+
+  - name: appSettingsPrd
+    displayName: Application Settings Production
     type: string
     default: ''
 
@@ -119,7 +139,7 @@ stages:
   - stage: BuildAndTest
     displayName: 'Build and Test'
     jobs:
-    - template: build-publish-dotnet.yaml
+    - template: app-build.yaml
       parameters:
         solutionPath: ${{ parameters.solutionPath }}
         projectPath: ${{ parameters.projectPath }}
@@ -129,59 +149,63 @@ stages:
   - stage: DeployDEV
     displayName: 'Deploy App to Dev'
     dependsOn: BuildAndTest
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/${{ parameters.defaultBranch }}'))
     jobs:
-    - template: deploy-az-function-app.yaml
+    - template: app-deploy.yaml
       parameters:
         environmentName: DEV
         serviceConnection: ${{ parameters.serviceConnectionDev }}
         functionAppName: ${{ parameters.functionAppNameDev }}
         adAppIdUri: ${{ parameters.adAppIdUriDev }}
         runtimeStack: ${{ parameters.runtimeStack }}
-        appSettings: ${{ parameters.appSettings }}
+        appSettings: ${{ parameters.appSettingsDev }}
         postmanCollection: ${{ parameters.postmanCollection }}
         postmanArgs: ${{ parameters.postmanArgsDev }} --global-var URL=${{ parameters.functionAppUrlDev }}
         
   - stage: DeploySIT
     displayName: 'Deploy App to SIT'
     dependsOn: DeployDEV
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/${{ parameters.defaultBranch }}'))
     jobs:
-    - template: deploy-az-function-app.yaml
+    - template: app-deploy.yaml
       parameters:
         environmentName: SIT
-        serviceConnection: ${{ parameters.serviceConnectionPrd }}
+        serviceConnection: ${{ parameters.serviceConnectionSIT }}
         functionAppName: ${{ parameters.functionAppNameSIT }}
         adAppIdUri: ${{ parameters.adAppIdUriSIT }}
         runtimeStack: ${{ parameters.runtimeStack }}
-        appSettings: ${{ parameters.appSettings }}
+        appSettings: ${{ parameters.appSettingsSIT }}
         postmanCollection: ${{ parameters.postmanCollection }}
         postmanArgs: ${{ parameters.postmanArgsSIT }} --global-var URL=${{ parameters.functionAppUrlSIT }}
 
   - stage: DeployUAT
     displayName: 'Deploy App to UAT'
     dependsOn: DeploySIT
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/${{ parameters.defaultBranch }}'))
     jobs:
-    - template: deploy-az-function-app.yaml
+    - template: app-deploy.yaml
       parameters:
         environmentName: UAT
         serviceConnection: ${{ parameters.serviceConnectionUAT }}
         functionAppName: ${{ parameters.functionAppNameUAT }}
         adAppIdUri: ${{ parameters.adAppIdUriUAT }}
         runtimeStack: ${{ parameters.runtimeStack }}
-        appSettings: ${{ parameters.appSettings }}
+        appSettings: ${{ parameters.appSettingsUAT }}
         postmanCollection: ${{ parameters.postmanCollection }}
         postmanArgs: ${{ parameters.postmanArgsUAT }} --global-var URL=${{ parameters.functionAppUrlUAT }}
 
   - stage: DeployPRD
     displayName: 'Deploy App to Production'
     dependsOn: DeployUAT
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/${{ parameters.defaultBranch }}'))
     jobs:
-    - template: deploy-az-function-app.yaml
+    - template: app-deploy.yaml
       parameters:
         environmentName: PRD
         serviceConnection: ${{ parameters.serviceConnectionPrd }}
         functionAppName: ${{ parameters.functionAppNamePrd }}
         adAppIdUri: ${{ parameters.adAppIdUriPrd }}
         runtimeStack: ${{ parameters.runtimeStack }}
-        appSettings: ${{ parameters.appSettings }}
+        appSettings: ${{ parameters.appSettingsPrd }}
         postmanCollection: ${{ parameters.postmanCollection }}
         postmanArgs: ${{ parameters.postmanArgsPrd }} --global-var URL=${{ parameters.functionAppUrlPrd }}

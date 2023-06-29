@@ -15,7 +15,7 @@ parameters:
     displayName: AAD App Id Uri
     type: string
 
-    #runtimeStack: # 'DOTNET|2.2' | 'DOTNET|3.1' | 'DOTNET|6.0' | 'DOTNET-ISOLATED|7.0'
+    # Values: 'DOTNET|2.2' | 'DOTNET|3.1' | 'DOTNET|6.0' | 'DOTNET-ISOLATED|7.0'
   - name: runtimeStack
     displayName: Runtime Stacak
     type: string
