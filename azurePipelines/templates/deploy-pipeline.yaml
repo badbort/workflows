@@ -21,6 +21,29 @@ parameters:
     displayName: DotNet Version
     default: '6.x'
 
+    # Allowed values: functionApp (Function App on Windows), functionAppLinux (Function App on Linux).
+    # Defaults to the windows option
+  - name: appType
+    displayName: Azure Function App type for the deployment
+    default: functionApp 
+    type: string
+
+  - name: environmentDev
+    displayName: Azure DevOps Deployment Environment for Dev
+    type: string
+
+  - name: environmentSIT
+    displayName: Azure DevOps Deployment Environment for SIT
+    type: string
+
+  - name: environmentUAT
+    displayName: Azure DevOps Deployment Environment for UAT
+    type: string
+
+  - name: environmentPrd
+    displayName: Azure DevOps Deployment Environment for Production
+    type: string
+
   - name: serviceConnectionDev
     displayName: DevService Connection Name
     type: string
@@ -134,6 +157,11 @@ parameters:
     displayName: Production Postman Extra Command Line Args
     type: string
     default: ''
+    
+  - name: testProduction
+    displayName: Perform Postman tests in Production
+    type: boolean
+    default: false
 
 stages:
   - stage: BuildAndTest
@@ -153,9 +181,11 @@ stages:
     jobs:
     - template: app-deploy.yaml
       parameters:
-        environmentName: DEV
+        deployment: Deploy_Dev
+        environmentName: ${{ parameters.environmentDev }}
         serviceConnection: ${{ parameters.serviceConnectionDev }}
         functionAppName: ${{ parameters.functionAppNameDev }}
+        appType: ${{ parameters.appType }}
         adAppIdUri: ${{ parameters.adAppIdUriDev }}
         runtimeStack: ${{ parameters.runtimeStack }}
         appSettings: ${{ parameters.appSettingsDev }}
@@ -169,9 +199,11 @@ stages:
     jobs:
     - template: app-deploy.yaml
       parameters:
-        environmentName: SIT
+        deployment: Deploy_SIT
+        environmentName: ${{ parameters.environmentSIT }}
         serviceConnection: ${{ parameters.serviceConnectionSIT }}
         functionAppName: ${{ parameters.functionAppNameSIT }}
+        appType: ${{ parameters.appType }}
         adAppIdUri: ${{ parameters.adAppIdUriSIT }}
         runtimeStack: ${{ parameters.runtimeStack }}
         appSettings: ${{ parameters.appSettingsSIT }}
@@ -185,9 +217,11 @@ stages:
     jobs:
     - template: app-deploy.yaml
       parameters:
-        environmentName: UAT
+        deployment: Deploy_UAT
+        environmentName: ${{ parameters.environmentUAT }}
         serviceConnection: ${{ parameters.serviceConnectionUAT }}
         functionAppName: ${{ parameters.functionAppNameUAT }}
+        appType: ${{ parameters.appType }}
         adAppIdUri: ${{ parameters.adAppIdUriUAT }}
         runtimeStack: ${{ parameters.runtimeStack }}
         appSettings: ${{ parameters.appSettingsUAT }}
@@ -201,11 +235,17 @@ stages:
     jobs:
     - template: app-deploy.yaml
       parameters:
-        environmentName: PRD
+        deployment: Deploy_Prd
+        environmentName: ${{ parameters.environmentPrd }}
         serviceConnection: ${{ parameters.serviceConnectionPrd }}
         functionAppName: ${{ parameters.functionAppNamePrd }}
+        appType: ${{ parameters.appType }}
         adAppIdUri: ${{ parameters.adAppIdUriPrd }}
         runtimeStack: ${{ parameters.runtimeStack }}
         appSettings: ${{ parameters.appSettingsPrd }}
-        postmanCollection: ${{ parameters.postmanCollection }}
-        postmanArgs: ${{ parameters.postmanArgsPrd }} --global-var URL=${{ parameters.functionAppUrlPrd }}
+        ${{ if eq(parameters.testProduction, true) }}:
+          postmanCollection: ${{ parameters.postmanCollection }}
+          postmanArgs: ${{ parameters.postmanArgsPrd }} --global-var URL=${{ parameters.functionAppUrlPrd }}
+        ${{ if ne(parameters.testProduction, true) }}:
+          postmanCollection: ''
+          postmanArgs: ''
