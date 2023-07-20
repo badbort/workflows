@@ -1,4 +1,8 @@
 parameters:
+  - name: deployment
+    displayName: Deployment Job Name
+    type: string
+    
   - name: environmentName
     displayName: Environment Name
     type: string
@@ -9,6 +13,11 @@ parameters:
     
   - name: functionAppName
     displayName: Function App Name
+    type: string
+
+    # Allowed values: functionApp (Function App on Windows), functionAppLinux (Function App on Linux).
+  - name: appType
+    displayName: Azure Function App type for the deployment
     type: string
 
   - name: adAppIdUri
@@ -37,7 +46,7 @@ parameters:
     default: ''
     
 jobs:  
-  - deployment: 'Deploy_${{ parameters.environmentName }}'
+  - deployment: ${{ parameters.deployment }}
     displayName: 'Deploy ${{ parameters.environmentName }}'
     environment: ${{ parameters.environmentName }}
     pool:
@@ -52,7 +61,7 @@ jobs:
             displayName: 'Azure App Service Deploy'
             inputs:
               azureSubscription: '${{ parameters.serviceConnection }}'
-              appType: 'functionAppLinux'
+              appType: '${{ parameters.appType }}'
               appName: '${{ parameters.functionAppName }}'
               package: '$(Pipeline.Workspace)/drop/*.zip'
               runtimeStack: ${{ parameters.runtimeStack }}
@@ -66,6 +75,7 @@ jobs:
             inputs:
               azureSubscription: ${{ parameters.serviceConnection }}
               scriptType: 'inlineScript'
+              condition: and(succeeded(), ne('${{ parameters.postmanCollection }}', ''), ne('${{ parameters.postmanCollection }}', 'null'))
               inline: |
                 Import-Module Az.Accounts
                 $access_token = (Get-AzAccessToken -ResourceUrl ${{parameters.adAppIdUri}}).Token
